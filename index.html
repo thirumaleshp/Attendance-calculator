@@ -115,7 +115,7 @@
                 requiredClasses = `You need to attend ${for75} more classes to reach 75% and ${for80} classes to reach 80%.`;
             } else {
                 const bunk75 = Math.floor(attendedClasses - (0.75 * totalClasses));
-                bunkInfo = `You can bunk ${bunk75} classes and maintain 75%.`;
+                bunkInfo = `You can bunk ${bunk75} classes and maintain 75%.<br>`;
 
                 if (attendancePercentage > 80) {
                     const bunk80 = Math.floor(attendedClasses - (0.80 * totalClasses));
