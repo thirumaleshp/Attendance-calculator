@@ -73,13 +73,16 @@
     <div class="container">
         <h1>Attendance Tracker</h1>
 
-        <label for="totalClasses">Total Number of Classes:</label>
-        <input type="number" id="totalClasses" placeholder="Enter total number of classes" required>
+        <!-- Form Element to Enable 'Enter' Submission -->
+        <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
+            <label for="totalClasses">Total Number of Classes:</label>
+            <input type="number" id="totalClasses" placeholder="Enter total number of classes" required>
 
-        <label for="attendedClasses">Classes Attended:</label>
-        <input type="number" id="attendedClasses" placeholder="Enter classes you attended" required>
+            <label for="attendedClasses">Classes Attended:</label>
+            <input type="number" id="attendedClasses" placeholder="Enter classes you attended" required>
 
-        <button onclick="calculateAttendance()">Check Attendance</button>
+            <button type="submit">Check Attendance</button>
+        </form>
 
         <div id="result" class="result" style="display:none;">
             <p id="attendancePercentage"></p>
@@ -115,11 +118,11 @@
                 requiredClasses = `You need to attend ${for75} more classes to reach 75% and ${for80} classes to reach 80%.`;
             } else {
                 const bunk75 = Math.floor(attendedClasses - (0.75 * totalClasses));
-                bunkInfo = `You can bunk ${bunk75} classes and maintain 75%.<br>`;
+                bunkInfo = `You can bunk ${bunk75} classes and maintain 75%<br>`;
 
                 if (attendancePercentage > 80) {
                     const bunk80 = Math.floor(attendedClasses - (0.80 * totalClasses));
-                    bunkInfo += ` You can bunk ${bunk80} classes and still maintain 80%.`;
+                    bunkInfo += ` Bunk ${bunk80} classes and maintain 80%`;
                 }
             }
 
