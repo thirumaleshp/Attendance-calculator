@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4caf50;
+        }
+
+        input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #4caf50;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 10px;
+        }
+
+        .result p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Attendance Calculator</h1>
+
+        <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
+            <label for="totalClasses">Total Number of Classes:</label>
+            <input type="number" id="totalClasses" placeholder="Enter total number of classes" required>
+
+            <label for="attendedClasses">Classes Attended:</label>
+            <input type="number" id="attendedClasses" placeholder="Enter classes you attended" required>
+
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div id="result" class="result" style="display:none;">
+            <p id="attendancePercentage"></p>
+            <p id="requiredClasses75"></p>
+            <p id="requiredClasses80"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculateAttendance() {
+            const totalClasses = Number(document.getElementById('totalClasses').value);
+            const attendedClasses = Number(document.getElementById('attendedClasses').value);
+
+            if (!totalClasses || !attendedClasses || attendedClasses > totalClasses || totalClasses <= 0) {
+                alert("Please enter valid values.");
+                return;
+            }
+
+            // Calculate percentage
+            const attendancePercentage = (attendedClasses / totalClasses) * 100;
+            document.getElementById('attendancePercentage').textContent = `Your Current Attendance is: ${attendancePercentage.toFixed(2)}%`;
+
+            // How many more classes needed for 75% attendance
+            let additionalClasses75 = 0;
+            let currentPercentage = attendancePercentage;
+
+            while (currentPercentage < 75) {
+                additionalClasses75++;
+                currentPercentage = ((attendedClasses + additionalClasses75) / (totalClasses + additionalClasses75)) * 100;
+            }
+
+            document.getElementById('requiredClasses75').textContent = `You need to attend ${additionalClasses75} more class(es) to reach 75% attendance`;
+
+            // Reset percentage for 80% calculation
+            currentPercentage = attendancePercentage;
+            let additionalClasses80 = 0;
+
+            while (currentPercentage < 80) {
+                additionalClasses80++;
+                currentPercentage = ((attendedClasses + additionalClasses80) / (totalClasses + additionalClasses80)) * 100;
+            }
+
+            document.getElementById('requiredClasses80').textContent = `and ${additionalClasses80} more class(es) to reach 80% attendance.`;
+
+            // Show result
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+
+</body>
+
+</html>
