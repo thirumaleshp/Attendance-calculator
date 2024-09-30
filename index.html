@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #88D788;
+            background-color: #e0f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,30 +17,30 @@
         }
 
         .container {
-            background-color: white;
+            background-color: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
+            max-width: 400px;
             width: 100%;
         }
 
         h1 {
             text-align: center;
-            color: #4caf50;
+            color: #00796b;
         }
 
         input[type="number"] {
             width: 95%;
             padding: 10px;
             margin: 10px 0;
-            border: 2px solid #4caf50;
+            border: 2px solid #00796b;
             border-radius: 5px;
         }
 
         button {
             width: 100%;
-            background-color: #4caf50;
+            background-color: #00796b;
             color: white;
             padding: 10px;
             border: none;
@@ -50,20 +50,22 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #004d40;
         }
 
         .result {
             text-align: center;
             margin-top: 20px;
             padding: 20px;
-            background-color: #e8f5e9;
+            background-color: #b2dfdb;
             border-radius: 10px;
+            display: none;
         }
 
         .result p {
             margin: 10px 0;
             font-size: 18px;
+            color: #004d40;
         }
     </style>
 </head>
@@ -72,8 +74,6 @@
 
     <div class="container">
         <h1>Attendance Tracker</h1>
-
-        <!-- Form Element to Enable 'Enter' Submission -->
         <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
             <label for="totalClasses">Total Number of Classes:</label>
             <input type="number" id="totalClasses" placeholder="Enter total number of classes" required>
@@ -84,55 +84,95 @@
             <button type="submit">Check Attendance</button>
         </form>
 
-        <div id="result" class="result" style="display:none;">
+        <div id="result" class="result">
             <p id="attendancePercentage"></p>
             <p id="absentClasses"></p>
-            <p id="bunkInfo"></p>
             <p id="requiredClasses"></p>
+            <p id="bunkInfo"></p>
         </div>
     </div>
 
     <script>
         function calculateAttendance() {
-            const totalClasses = document.getElementById('totalClasses').value;
-            const attendedClasses = document.getElementById('attendedClasses').value;
+    const totalClasses = parseInt(document.getElementById('totalClasses').value);
+    const attendedClasses = parseInt(document.getElementById('attendedClasses').value);
 
-            if (!totalClasses || !attendedClasses) {
-                alert("Please fill in both fields");
-                return;
-            }
+    if (!totalClasses || !attendedClasses || attendedClasses > totalClasses) {
+        alert("Please enter valid values.");
+        return;
+    }
 
-            const attendancePercentage = ((attendedClasses / totalClasses) * 100).toFixed(2);
-            const absentClasses = totalClasses - attendedClasses;
-            const resultDiv = document.getElementById('result');
+    let attendancePercentage = ((attendedClasses / totalClasses) * 100).toFixed(2);
+    const absentClasses = totalClasses - attendedClasses;
+    const resultDiv = document.getElementById('result');
 
-            document.getElementById('attendancePercentage').innerHTML = `Your Latest Attendance is: ${attendancePercentage}%`;
-            document.getElementById('absentClasses').innerHTML = `Absent Classes: ${absentClasses}`;
+    document.getElementById('attendancePercentage').innerHTML = `Your Latest Attendance is: ${attendancePercentage}%`;
+    document.getElementById('absentClasses').innerHTML = `Absent Classes: ${absentClasses}`;
 
-            let bunkInfo = "";
-            let requiredClasses = "";
+    let requiredClasses = "";
+    let bunkInfo = "";
+    let additionalClassesNeeded = 0;
 
-            if (attendancePercentage < 75) {
-                const for75 = Math.ceil((0.75 * totalClasses) - attendedClasses);
-                const for80 = Math.ceil((0.80 * totalClasses) - attendedClasses);
-                requiredClasses = `You need to attend ${for75} more classes to reach 75% and ${for80} classes to reach 80%.`;
-            } else {
-                const bunk75 = Math.floor(attendedClasses - (0.75 * totalClasses));
-                bunkInfo = `You can bunk ${bunk75} classes and maintain 75%<br>`;
+    // If attendance is below 75%
+    if (attendancePercentage < 75) {
+        let tempTotal = totalClasses;
+        let tempAttended = attendedClasses;
 
-                if (attendancePercentage > 80) {
-                    const bunk80 = Math.floor(attendedClasses - (0.80 * totalClasses));
-                    bunkInfo += ` Bunk ${bunk80} classes and maintain 80%`;
-                }
-            }
-
-            document.getElementById('bunkInfo').innerHTML = bunkInfo;
-            document.getElementById('requiredClasses').innerHTML = requiredClasses;
-
-            resultDiv.style.display = 'block';
+        // Calculate additional classes needed for 75%
+        while (attendancePercentage < 75) {
+            tempAttended++;
+            tempTotal++;
+            attendancePercentage = (tempAttended / tempTotal) * 100;
+            additionalClassesNeeded++;
         }
+        requiredClasses = `You need to attend ${additionalClassesNeeded} more class(es) to reach 75% `;
+
+        // Reset for 80% calculation
+        tempTotal = totalClasses + additionalClassesNeeded;
+        tempAttended = attendedClasses + additionalClassesNeeded;
+        attendancePercentage = (tempAttended / tempTotal) * 100;
+        additionalClassesNeeded = 0;
+
+        while (attendancePercentage < 80) {
+            tempAttended++;
+            tempTotal++;
+            attendancePercentage = (tempAttended / tempTotal) * 100;
+            additionalClassesNeeded++;
+        }
+        requiredClasses += ` and attend ${additionalClassesNeeded} more class(es) to reach 80% attendance.`;
+    } else {
+        // If attendance is above 75%
+        let tempTotal = totalClasses;
+        let tempAttended = attendedClasses;
+
+        // Calculate classes that can be bunked while maintaining 75%
+        while (attendancePercentage >= 75) {
+            tempTotal++;
+            attendancePercentage = (tempAttended / tempTotal) * 100;
+            additionalClassesNeeded++;
+        }
+        bunkInfo = `You can bunk ${additionalClassesNeeded - 1} class(es) and maintain 75% `;
+
+        // Reset for 80% calculation
+        tempTotal = totalClasses;
+        tempAttended = attendedClasses;
+        additionalClassesNeeded = 0; // Reset for new calculation
+        attendancePercentage = ((tempAttended) / (tempTotal)) * 100; // Recalculate the attendance percentage
+
+        // Calculate classes that can be bunked while maintaining 80%
+        if (attendancePercentage > 80) {
+            while (attendancePercentage > 80) {
+                tempTotal++;
+                attendancePercentage = (tempAttended / tempTotal) * 100;
+                additionalClassesNeeded++;
+            }
+            bunkInfo += ` and can bunk ${additionalClassesNeeded - 1} class(es) and still maintain 80% attendance.`;
+        }
+    }
+    document.getElementById('requiredClasses').innerHTML = requiredClasses;
+    document.getElementById('bunkInfo').innerHTML = bunkInfo;
+    resultDiv.style.display = 'block';
+}
     </script>
-
 </body>
-
 </html>
