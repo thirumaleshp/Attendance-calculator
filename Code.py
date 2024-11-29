@@ -37,7 +37,7 @@ else:
             tc += 1
             per = (tca / tc) * 100 
             j += 1
-        print("You can bunk", j-1 , "class(es) and still maintain 80% attendance")
+        print("You can bunk", j-1 , "class(es) and maintain 80% attendance")
     
         if per > 75:
             i=0
@@ -45,4 +45,4 @@ else:
                 tc +=1
                 per = (tca / tc) * 100
                 i += 1
-            print("and bunk ",i+j-1,"class for 75% attendance")
+            print("and bunk ",i+j-1,"class(es) and still maintain 75% attendance")
