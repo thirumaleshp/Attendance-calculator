@@ -48,4 +48,4 @@ if tc>tca:
                     i += 1
                 print("and bunk ",i+j-1,"class(es) and still maintain 75% attendance")
 else:
-    print(''Enter valid details)
+    print('Enter valid details')
