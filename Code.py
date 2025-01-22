@@ -3,9 +3,9 @@ import math
 print("Know Your attendence")
 tc=int(input("Enter TOTAL NUMBER OF CLASSES:"))
 tca=int(input("Enter CLASS YOU ATTENDED:"))
+print()
 if tc>tca:
     per=((tca/tc)*100)
-    print()
     time.sleep(0.3)
     print("Your Latest Attendance is: {:.2f}%".format(per))
     print()
