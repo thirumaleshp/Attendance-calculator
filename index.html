@@ -188,7 +188,38 @@
                     additionalClassesNeeded++;
                 }
                 requiredClasses += ` and attend <strong>${additionalClassesNeeded}</strong> more class(es) to reach 80% attendance.`;
-            } else {
+            }
+
+            // If attendance is between 75% and 80%
+            else if (attendancePercentage >= 75 && attendancePercentage < 80) {
+                let tempTotal = totalClasses;
+                let tempAttended = attendedClasses;
+                let i = 0;
+
+                // Calculate classes that can be bunked while maintaining 75%
+                while ((tempAttended / tempTotal) * 100 > 75) {
+                    tempTotal++;
+                    i++;
+                }
+                // Only show bunk info if it's greater than 0
+                if (i > 1) {
+                    bunkInfo = `and can bunk <strong>${i-1}</strong> class(es) and maintain 75% attendance`;
+                }
+
+                // Calculate additional classes needed for 80%
+                tempTotal = totalClasses;
+                tempAttended = attendedClasses;
+                let j = 0;
+                
+                while ((tempAttended / tempTotal) * 100 < 80) {
+                    tempAttended++;
+                    tempTotal++;
+                    j++;
+                }
+                requiredClasses = `You need to attend <strong>${j}</strong> more class(es) for 80% attendance.`;
+            }
+
+            else {
                 // If attendance is above 75%
                 let tempTotal = totalClasses;
                 let tempAttended = attendedClasses;
