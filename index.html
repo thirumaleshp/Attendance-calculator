@@ -174,22 +174,29 @@
 
         /* Link styling */
         a {
-            display: block;
-            text-align: center; /* Center link */
-            margin-top: 30px;
-            padding-top: 15px; /* Space above link */
-            border-top: 1px solid var(--border-light); /* Separator line above link */
+            display: inline-block; /* THIS IS THE KEY FIX: Makes element only as wide as content */
+            /* text-align: center; */ /* No longer needed on the 'a' tag itself */
+            margin-top: 20px;     /* Keeps space above */
+            padding: 4px 8px;     /* Small padding around text (optional) */
+            border-top: 10px solid var(--border-light); /* Keep border off if you removed it */
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, background-color 0.2s ease;
+            border-radius: 4px;  /* Optional: slightly rounded corners */
         }
 
         a:hover {
             color: var(--text-primary); /* Black on hover */
+            background-color: var(--border-light); /* Optional: Subtle background hover */
             text-decoration: underline;
         }
+
+        .link-container {
+        text-align: center; /* Centers inline/inline-block children */
+        /* margin-top: 20px; */ /* Move margin here if removing from 'a' */
+    }
 
         /* Remove the default extra space from the <br><br> if it remains */
         /* It's better to remove the <br> tags from HTML and use margins */
@@ -224,8 +231,11 @@
             <p id="requiredClasses"></p>
             <p id="bunkInfo"></p>
         </div>
+
         <!-- Centered link, styled via CSS -->
-        <a href="https://thirumalesh.xyz" target="_blank">Profile @thirumalesh</a>
+        <div class="link-container">
+            <a href="https://thirumalesh.xyz" target="_blank">Profile @thirumalesh</a>
+        </div>
     </div>
 
     <script>
