@@ -5,47 +5,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Tracker</title>
+    <!-- Using a system font stack for broad compatibility -->
     <style>
+        /* --- Black & White UI / UX STYLES --- */
+
+        :root {
+            /* B&W Palette */
+            --bg-color: #000000;         /* Pure Black background */
+            --container-bg: #ffffff;    /* Pure White container */
+            --text-primary: #000000;    /* Black text on white */
+            --text-secondary: #555555;  /* Medium Grey for secondary info/labels */
+            --border-light: #eeeeee;    /* Very light grey for subtle borders */
+            --border-medium: #cccccc;   /* Medium grey for input borders */
+            --border-dark: #000000;     /* Black for focus/emphasis */
+        }
+
         /* General Styles */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            color: #ffffff;
+            color: var(--text-primary); /* Default text color */
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+            -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
         }
 
         .container {
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
-            max-width: 400px;
+            background-color: var(--container-bg);
+            padding: 35px 40px;
+            border-radius: 8px; /* Slightly less rounded for a sharper look */
+            /* No shadow for a flatter B&W design */
+            max-width: 380px; /* Slightly narrower */
             width: 100%;
-            text-align: center;
+            text-align: left;
+            box-sizing: border-box;
+            border: 1px solid var(--border-light); /* Subtle border */
         }
 
         h1 {
-            color: #ffffff;
-            font-size: 28px;
-            margin-bottom: 20px;
-            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 22px;
+            margin-top: 0; /* Remove default top margin */
+            margin-bottom: 30px;
+            font-weight: 600; /* Semi-bold */
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
         }
 
         input[type="number"] {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #444;
-            border-radius: 8px;
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
             font-size: 16px;
-            background-color: #333;
-            color: #ffffff;
-            transition: border-color 0.3s ease;
-            /* Hide number input arrows */
+            background-color: var(--container-bg); /* White background */
+            color: var(--text-primary); /* Black text */
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
             -webkit-appearance: textfield;
             -moz-appearance: textfield;
             appearance: textfield;
@@ -58,63 +88,116 @@
         }
 
         input[type="number"]:focus {
-            border-color: #ffffff;
+            border-color: var(--border-dark); /* Black border on focus */
             outline: none;
+             /* Optional: subtle inset shadow instead of thicker border */
+            box-shadow: inset 0 0 0 1px var(--border-dark);
         }
 
-        button {
+        /* Error Message Style - Placed above button */
+        .error-message {
+            color: var(--text-primary); /* Black error text */
+            font-size: 14px;
+            text-align: center;
+            margin-top: -5px; /* Pull up slightly */
+            margin-bottom: 15px; /* Space before button */
+            min-height: 20px;
+            font-weight: 600; /* Make error text bold */
+        }
+
+        button[type="submit"] {
             width: 100%;
-            background-color: #ffffff;
-            color: #000000;
+            background-color: var(--border-dark); /* Black button */
+            color: var(--container-bg); /* White text */
             padding: 12px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 600;
+            transition: opacity 0.2s ease; /* Fade slightly on hover */
+            margin-top: 5px; /* Reduced top margin */
         }
 
-        button:hover {
-            background-color: #e0e0e0;
-            transform: translateY(-2px);
+        button[type="submit"]:hover {
+            opacity: 0.85;
         }
 
+         button[type="submit"]:active {
+            opacity: 1.0;
+            transform: scale(0.99); /* Subtle press effect */
+        }
+
+
+        /* Results Area Styling */
         .result {
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #333;
-            border-radius: 10px;
-            display: none;
-            border: 1px solid #444;
+            text-align: left;
+            margin-top: 30px; /* More space before results */
+            padding-top: 20px; /* Add padding only at the top */
+            border-top: 1px solid var(--border-light); /* Separator line */
+            /* display: none; */ /* Controlled by JS */
         }
 
         .result p {
-            margin: 10px 0;
-            font-size: 16px;
-            color: #ffffff;
+            margin: 8px 0; /* Tighter spacing between result lines */
+            font-size: 15px;
+            color: var(--text-secondary); /* Grey for general result text */
+            line-height: 1.5;
         }
 
-        .result p strong {
-            color: #ffffff;
+        .result p:first-child {
+             margin-top: 0;
+        }
+         .result p:last-child {
+            margin-bottom: 0;
+         }
+
+        /* Style the main percentage result */
+        #attendancePercentage {
+            font-size: 18px;
+            color: var(--text-primary); /* Black for main result */
+            font-weight: 600;
+            margin-bottom: 12px; /* More space after main result */
+        }
+
+        #attendancePercentage strong {
+             font-size: 1.1em; /* Make number slightly bigger */
+             font-weight: 700; /* Bolder number */
+        }
+
+        /* Style other result numbers */
+         .result p strong {
+            color: var(--text-primary); /* Black for numbers */
             font-weight: 600;
         }
 
+
+        /* Link styling */
         a {
             display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #ffffff;
+            text-align: center; /* Center link */
+            margin-top: 30px;
+            padding-top: 15px; /* Space above link */
+            border-top: 1px solid var(--border-light); /* Separator line above link */
+            color: var(--text-secondary);
             text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s ease;
         }
 
         a:hover {
-            color: #e0e0e0;
+            color: var(--text-primary); /* Black on hover */
             text-decoration: underline;
         }
+
+        /* Remove the default extra space from the <br><br> if it remains */
+        /* It's better to remove the <br> tags from HTML and use margins */
+        form br {
+             display: none;
+        }
+
+        /* --- Black & White UI / UX STYLES END --- */
     </style>
 </head>
 
@@ -123,136 +206,184 @@
     <div class="container">
         <h1>Attendance Tracker</h1>
         <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
-            <label for="totalClasses">Total Number of Classes:</label>
-            <input type="number" id="totalClasses" placeholder="Enter total number of classes" required>
+            <label for="totalClasses"><b>Total Classes</b></label>
+            <input type="number" id="totalClasses" placeholder="e.g., 50" required>
 
-            <label for="attendedClasses">Classes Attended:</label>
-            <input type="number" id="attendedClasses" placeholder="Enter classes you attended" required><br><br>
+            <label for="attendedClasses"><b>Classes Attended</b></label>
+            <input type="number" id="attendedClasses" placeholder="e.g., 40" required>
+
+            <!-- Error message div - moved below inputs -->
+            <div id="errorMessage" class="error-message"></div>
 
             <button type="submit">Check Attendance</button>
         </form>
 
-        <div id="result" class="result">
+        <div id="result" class="result" style="display: none;"> <!-- Keep inline style controlled by JS -->
             <p id="attendancePercentage"></p>
             <p id="absentClasses"></p>
             <p id="requiredClasses"></p>
             <p id="bunkInfo"></p>
         </div>
-        <a href="https://github.com/thirumaleshp" target="_blank" style="display: block; text-align: right; padding-top: 5%;">GitHub</a>
+        <!-- Centered link, styled via CSS -->
+        <a href="https://thirumalesh.xyz" target="_blank">Profile @thirumalesh</a>
     </div>
 
     <script>
         function calculateAttendance() {
-            const totalClasses = parseInt(document.getElementById('totalClasses').value);
-            const attendedClasses = parseInt(document.getElementById('attendedClasses').value);
+            const totalClassesInput = document.getElementById('totalClasses');
+            const attendedClassesInput = document.getElementById('attendedClasses');
+            const totalClasses = parseInt(totalClassesInput.value);
+            const attendedClasses = parseInt(attendedClassesInput.value);
+            const resultDiv = document.getElementById('result');
+            const errorMessageDiv = document.getElementById('errorMessage'); // Get the error div
 
-            if (!totalClasses || !attendedClasses || attendedClasses > totalClasses) {
-                alert("Please enter valid values.");
+            // Clear previous error message and hide result div initially
+            errorMessageDiv.textContent = '';
+            resultDiv.style.display = 'none';
+
+            // --- Validation ---
+            if (isNaN(totalClasses) || totalClasses <= 0 || isNaN(attendedClasses) || attendedClasses < 0 || attendedClasses > totalClasses) {
+                errorMessageDiv.textContent = "Enter valid numbers (Attended ≤ Total)";
                 return;
             }
+            // --- End Validation ---
 
-            let attendancePercentage = ((attendedClasses / totalClasses) * 100).toFixed(2);
+
+            // --- Calculations ---
+            let attendancePercentage = ((attendedClasses / totalClasses) * 100);
             const absentClasses = totalClasses - attendedClasses;
-            const resultDiv = document.getElementById('result');
 
-            document.getElementById('attendancePercentage').innerHTML = `Your Latest Attendance is: <strong>${attendancePercentage}%</strong>`;
-            document.getElementById('absentClasses').innerHTML = `Absent Classes: <strong>${absentClasses}</strong>`;
+            document.getElementById('attendancePercentage').innerHTML = `Attendance: <strong>${attendancePercentage.toFixed(2)}%</strong>`;
+            document.getElementById('absentClasses').innerHTML = `Classes Missed: <strong>${absentClasses}</strong>`;
 
             let requiredClasses = "";
             let bunkInfo = "";
-            let additionalClassesNeeded = 0;
+
+            let currentPercentageForCalc = attendancePercentage; // Use unrounded for logic
 
             // If attendance is below 75%
-            if (attendancePercentage < 75) {
+            if (currentPercentageForCalc < 75) {
                 let tempTotal = totalClasses;
                 let tempAttended = attendedClasses;
+                let neededFor75 = 0;
 
-                // Calculate additional classes needed for 75%
-                while (attendancePercentage < 75) {
+                // Calculate needed for 75%
+                while ((tempAttended / tempTotal) * 100 < 75) {
                     tempAttended++;
                     tempTotal++;
-                    attendancePercentage = (tempAttended / tempTotal) * 100;
-                    additionalClassesNeeded++;
+                    neededFor75++;
                 }
-                requiredClasses = `You need to attend <strong>${additionalClassesNeeded}</strong> more class(es) to reach 75% `;
+                requiredClasses = `Need to attend next <strong>${neededFor75}</strong> class(es) for 75%`; // Start the message
 
-                // Reset for 80% calculation
-                tempTotal = totalClasses + additionalClassesNeeded;
-                tempAttended = attendedClasses + additionalClassesNeeded;
-                attendancePercentage = (tempAttended / tempTotal) * 100;
-
-                while (attendancePercentage < 80) {
+                // --- START: ADDED BACK 80% CALCULATION ---
+                let neededFor80 = 0;
+                // Continue from the state where 75% is reached
+                while ((tempAttended / tempTotal) * 100 < 80) {
                     tempAttended++;
                     tempTotal++;
-                    attendancePercentage = (tempAttended / tempTotal) * 100;
-                    additionalClassesNeeded++;
+                    neededFor80++;
                 }
-                requiredClasses += ` and attend <strong>${additionalClassesNeeded}</strong> more class(es) to reach 80% attendance.`;
+
+                // Append the 80% information if additional classes are needed
+                if (neededFor80 > 0) {
+                    // Calculate total needed from start for 80% (neededFor75 + neededFor80)
+                    let totalNeededFor80 = neededFor75 + neededFor80;
+                     requiredClasses += ` and attend <strong>${totalNeededFor80}</strong> total class(es) to reach 80%.`; // Updated wording
+                     // Alternate wording: requiredClasses += ` and attend <strong>${neededFor80}</strong> more after that to reach 80%.`;
+                } else {
+                     requiredClasses += `.`; // Just end sentence if 80% already met
+                }
+                // --- END: ADDED BACK 80% CALCULATION ---
+
+                bunkInfo = ""; // No bunking possible
+
             }
-
             // If attendance is between 75% and 80%
-            else if (attendancePercentage >= 75 && attendancePercentage < 80) {
+            else if (currentPercentageForCalc >= 75 && currentPercentageForCalc < 80) {
                 let tempTotal = totalClasses;
                 let tempAttended = attendedClasses;
-                let i = 0;
+                let i = 0; // Bunkable for 75%
 
-                // Calculate classes that can be bunked while maintaining 75%
-                while ((tempAttended / tempTotal) * 100 > 75) {
-                    tempTotal++;
-                    i++;
-                }
-                // Only show bunk info if it's greater than 0
-                if (i > 1) {
-                    bunkInfo = `and can bunk <strong>${i-1}</strong> class(es) and maintain 75% attendance`;
+                while (((tempAttended) / (tempTotal + 1)) * 100 >= 75) {
+                     tempTotal++;
+                     i++;
+                 }
+
+                if (i > 0) {
+                    bunkInfo = `Can miss next <strong>${i}</strong> class(es) for 75%.`;
+                } else {
+                     bunkInfo = `Cannot miss next class for 75%.`;
                 }
 
-                // Calculate additional classes needed for 80%
-                tempTotal = totalClasses;
-                tempAttended = attendedClasses;
-                let j = 0;
-                
+                tempTotal = totalClasses; // Reset
+                tempAttended = attendedClasses; // Reset
+                let j = 0; // Needed for 80%
                 while ((tempAttended / tempTotal) * 100 < 80) {
                     tempAttended++;
                     tempTotal++;
                     j++;
                 }
-                requiredClasses = `You need to attend <strong>${j}</strong> more class(es) for 80% attendance`;
+                 if (j > 0) {
+                    requiredClasses = `Need to attend next <strong>${j}</strong> class(es) for 80%.`;
+                 } else {
+                     requiredClasses = ""; // Already >= 80%
+                 }
             }
-
+            // Attendance is 80% or above
             else {
-                // If attendance is above 75%
                 let tempTotal = totalClasses;
                 let tempAttended = attendedClasses;
+                let bunkableFor75 = 0;
 
-                // Calculate classes that can be bunked while maintaining 75%
-                while (attendancePercentage >= 75) {
-                    tempTotal++;
-                    attendancePercentage = (tempAttended / tempTotal) * 100;
-                    additionalClassesNeeded++;
-                }
-                bunkInfo = `You can bunk <strong>${additionalClassesNeeded - 1}</strong> class(es) and maintain 75% `;
+                 while (((tempAttended) / (tempTotal + 1)) * 100 >= 75) {
+                     tempTotal++;
+                     bunkableFor75++;
+                 }
+                 if (bunkableFor75 > 0) {
+                    bunkInfo = `Can miss next <strong>${bunkableFor75}</strong> class(es) for 75%.`;
+                 } else {
+                      bunkInfo = `Cannot miss next class for 75%.`;
+                 }
 
-                // Reset for 80% calculation
-                tempTotal = totalClasses;
-                tempAttended = attendedClasses;
-                additionalClassesNeeded = 0; // Reset for new calculation
-                attendancePercentage = ((tempAttended) / (tempTotal)) * 100; // Recalculate the attendance percentage
+                tempTotal = totalClasses; // Reset
+                tempAttended = attendedClasses; // Reset
+                let bunkableFor80 = 0;
 
-                // Calculate classes that can be bunked while maintaining 80%
-                if (attendancePercentage > 80) {
-                    while (attendancePercentage > 80) {
-                        tempTotal++;
-                        attendancePercentage = (tempAttended / tempTotal) * 100;
-                        additionalClassesNeeded++;
+                 while (((tempAttended) / (tempTotal + 1)) * 100 >= 80) {
+                     tempTotal++;
+                     bunkableFor80++;
+                 }
+
+                 if (bunkableFor80 > 0) {
+                    if (bunkInfo.startsWith("Can miss")) {
+                         if (bunkableFor80 !== bunkableFor75) { // Only add if different
+                             bunkInfo += ` (Can miss <strong>${bunkableFor80}</strong> for 80%).`;
+                         }
+                    } else { // If couldn't miss for 75%
+                         bunkInfo += ` Can miss <strong>${bunkableFor80}</strong> for 80%.`;
                     }
-                    bunkInfo += ` and can bunk <strong>${additionalClassesNeeded - 1}</strong> class(es) and still maintain 80% attendance.`;
-                }
+                 } else {
+                    // Add "cannot miss for 80%" info if relevant
+                    if (bunkInfo.endsWith('.')){ // Append if previous sentence ended
+                        bunkInfo += " Cannot miss next class for 80%.";
+                    } else { // Add separator if needed
+                         bunkInfo += ". Cannot miss next class for 80%.";
+                    }
+                 }
+                 requiredClasses = ""; // No classes required
             }
+
+            // --- Display Results ---
+            // Only display lines if they have content
             document.getElementById('requiredClasses').innerHTML = requiredClasses;
+            document.getElementById('requiredClasses').style.display = requiredClasses ? 'block' : 'none';
+
             document.getElementById('bunkInfo').innerHTML = bunkInfo;
-            resultDiv.style.display = 'block';
+            document.getElementById('bunkInfo').style.display = bunkInfo ? 'block' : 'none';
+
+            resultDiv.style.display = 'block'; // Show results container
         }
     </script>
-</body>
 
-</html>
+</body>
+</html> 
