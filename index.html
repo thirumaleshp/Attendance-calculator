@@ -36,6 +36,8 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://github.com/thirumaleshp/Attendance-calculator">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <!-- Stylesheets and other resources -->
     <style>
         /* --- Black & White UI / UX STYLES --- */
@@ -225,9 +227,9 @@
         }
 
         .link-container {
-        text-align: center; /* Centers inline/inline-block children */
-        /* margin-top: 20px; */ /* Move margin here if removing from 'a' */
-    }
+            text-align: center; /* Centers inline/inline-block children */
+            /* margin-top: 20px; */ /* Move margin here if removing from 'a' */
+        }
 
         /* Remove the default extra space from the <br><br> if it remains */
         /* It's better to remove the <br> tags from HTML and use margins */
@@ -236,14 +238,60 @@
         }
 
         /* Black & White UI / UX */
+
+        .share-button, .download-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--border-dark);
+            color: var(--container-bg);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.2s ease;
+            width: 48%;
+        }
+
+        .share-button:hover, .download-button:hover {
+            opacity: 0.85;
+        }
+
+        .share-button:active, .download-button:active {
+            opacity: 1.0;
+            transform: scale(0.99);
+        }
+
+        .share-button svg, .download-button svg {
+            margin-right: 8px;
+        }
+
+        /* Style for the share buttons container */
+        .share-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Message for devices that don't support sharing */
+        #shareNotSupported {
+            display: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
     </style>
 
-</head>
 </head>
 
 <body>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <h1>Attendance Tracker</h1>
         <form id="attendanceForm" onsubmit="event.preventDefault(); calculateAttendance();">
             <label for="totalClasses"><b>Total Classes</b></label>
@@ -252,33 +300,57 @@
             <label for="attendedClasses"><b>Classes Attended</b></label>
             <input type="number" id="attendedClasses" placeholder="e.g., 40" required>
 
-            <!-- Error message div - moved below inputs -->
             <div id="errorMessage" class="error-message"></div>
 
             <button type="submit">Check Attendance</button>
         </form>
 
-        <div id="result" class="result" style="display: none;"> <!-- Keep inline style controlled by JS -->
+        <div id="result" class="result" style="display: none;">
             <p id="attendancePercentage"></p>
             <p id="absentClasses"></p>
             <p id="requiredClasses"></p>
             <p id="bunkInfo"></p>
+            
+            <!-- Add Share Container -->
+            <div class="share-container">
+                <button id="shareButton" class="share-button">
+                    <!-- Share Icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    Share Results
+                </button>
+                <button id="downloadButton" class="download-button">
+                    <!-- Download Icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Image
+                </button>
+            </div>
+            <p id="shareNotSupported">Sharing not supported on this device</p>
         </div>
 
-        <!-- Centered link, styled via CSS -->
         <div class="link-container">
             <a href="https://thirumalesh.xyz" target="_blank">Profile @thirumalesh</a>
         </div>
     </div>
 
     <script>
+        // Your existing calculateAttendance function
         function calculateAttendance() {
             const totalClassesInput = document.getElementById('totalClasses');
             const attendedClassesInput = document.getElementById('attendedClasses');
             const totalClasses = parseInt(totalClassesInput.value);
             const attendedClasses = parseInt(attendedClassesInput.value);
             const resultDiv = document.getElementById('result');
-            const errorMessageDiv = document.getElementById('errorMessage'); // Get the error div
+            const errorMessageDiv = document.getElementById('errorMessage');
 
             // Clear previous error message and hide result div initially
             errorMessageDiv.textContent = '';
@@ -289,8 +361,6 @@
                 errorMessageDiv.textContent = "Enter valid numbers (Attended ≤ Total)";
                 return;
             }
-            // --- End Validation ---
-
 
             // --- Calculations ---
             let attendancePercentage = ((attendedClasses / totalClasses) * 100);
@@ -302,7 +372,7 @@
             let requiredClasses = "";
             let bunkInfo = "";
 
-            let currentPercentageForCalc = attendancePercentage; // Use unrounded for logic
+            let currentPercentageForCalc = attendancePercentage;
 
             // If attendance is below 75%
             if (currentPercentageForCalc < 75) {
@@ -316,61 +386,54 @@
                     tempTotal++;
                     neededFor75++;
                 }
-                requiredClasses = `Need to attend next <strong>${neededFor75}</strong> class(es) for 75%`; // Start the message
+                requiredClasses = `Need to attend next <strong>${neededFor75}</strong> class(es) for 75%`;
 
-                // --- START: ADDED BACK 80% CALCULATION ---
                 let neededFor80 = 0;
-                // Continue from the state where 75% is reached
                 while ((tempAttended / tempTotal) * 100 < 80) {
                     tempAttended++;
                     tempTotal++;
                     neededFor80++;
                 }
 
-                // Append the 80% information if additional classes are needed
                 if (neededFor80 > 0) {
-                    // Calculate total needed from start for 80% (neededFor75 + neededFor80)
                     let totalNeededFor80 = neededFor75 + neededFor80;
-                     requiredClasses += ` and attend <strong>${totalNeededFor80}</strong> total class(es) to reach 80%.`; // Updated wording
-                     // Alternate wording: requiredClasses += ` and attend <strong>${neededFor80}</strong> more after that to reach 80%.`;
+                    requiredClasses += ` and attend <strong>${totalNeededFor80}</strong> total class(es) to reach 80%.`;
                 } else {
-                     requiredClasses += `.`; // Just end sentence if 80% already met
+                    requiredClasses += `.`;
                 }
-                // --- END: ADDED BACK 80% CALCULATION ---
 
-                bunkInfo = ""; // No bunking possible
-
+                bunkInfo = "";
             }
             // If attendance is between 75% and 80%
             else if (currentPercentageForCalc >= 75 && currentPercentageForCalc < 80) {
                 let tempTotal = totalClasses;
                 let tempAttended = attendedClasses;
-                let i = 0; // Bunkable for 75%
+                let i = 0;
 
                 while (((tempAttended) / (tempTotal + 1)) * 100 >= 75) {
-                     tempTotal++;
-                     i++;
-                 }
+                    tempTotal++;
+                    i++;
+                }
 
                 if (i > 0) {
                     bunkInfo = `Can miss next <strong>${i}</strong> class(es) for 75%.`;
                 } else {
-                     bunkInfo = `Cannot miss next class for 75%.`;
+                    bunkInfo = `Cannot miss next class for 75%.`;
                 }
 
-                tempTotal = totalClasses; // Reset
-                tempAttended = attendedClasses; // Reset
-                let j = 0; // Needed for 80%
+                tempTotal = totalClasses;
+                tempAttended = attendedClasses;
+                let j = 0;
                 while ((tempAttended / tempTotal) * 100 < 80) {
                     tempAttended++;
                     tempTotal++;
                     j++;
                 }
-                 if (j > 0) {
+                if (j > 0) {
                     requiredClasses = `Need to attend next <strong>${j}</strong> class(es) for 80%.`;
-                 } else {
-                     requiredClasses = ""; // Already >= 80%
-                 }
+                } else {
+                    requiredClasses = "";
+                }
             }
             // Attendance is 80% or above
             else {
@@ -378,55 +441,212 @@
                 let tempAttended = attendedClasses;
                 let bunkableFor75 = 0;
 
-                 while (((tempAttended) / (tempTotal + 1)) * 100 >= 75) {
-                     tempTotal++;
-                     bunkableFor75++;
-                 }
-                 if (bunkableFor75 > 0) {
+                while (((tempAttended) / (tempTotal + 1)) * 100 >= 75) {
+                    tempTotal++;
+                    bunkableFor75++;
+                }
+                if (bunkableFor75 > 0) {
                     bunkInfo = `Can miss next <strong>${bunkableFor75}</strong> class(es) for 75%.`;
-                 } else {
-                      bunkInfo = `Cannot miss next class for 75%.`;
-                 }
+                } else {
+                    bunkInfo = `Cannot miss next class for 75%.`;
+                }
 
-                tempTotal = totalClasses; // Reset
-                tempAttended = attendedClasses; // Reset
+                tempTotal = totalClasses;
+                tempAttended = attendedClasses;
                 let bunkableFor80 = 0;
 
-                 while (((tempAttended) / (tempTotal + 1)) * 100 >= 80) {
-                     tempTotal++;
-                     bunkableFor80++;
-                 }
+                while (((tempAttended) / (tempTotal + 1)) * 100 >= 80) {
+                    tempTotal++;
+                    bunkableFor80++;
+                }
 
-                 if (bunkableFor80 > 0) {
+                if (bunkableFor80 > 0) {
                     if (bunkInfo.startsWith("Can miss")) {
-                         if (bunkableFor80 !== bunkableFor75) { // Only add if different
-                             bunkInfo += ` (Can miss <strong>${bunkableFor80}</strong> for 80%).`;
-                         }
-                    } else { // If couldn't miss for 75%
-                         bunkInfo += ` Can miss <strong>${bunkableFor80}</strong> for 80%.`;
+                        if (bunkableFor80 !== bunkableFor75) {
+                            bunkInfo += ` (Can miss <strong>${bunkableFor80}</strong> for 80%).`;
+                        }
+                    } else {
+                        bunkInfo += ` Can miss <strong>${bunkableFor80}</strong> for 80%.`;
                     }
-                 } else {
-                    // Add "cannot miss for 80%" info if relevant
-                    if (bunkInfo.endsWith('.')){ // Append if previous sentence ended
+                } else {
+                    if (bunkInfo.endsWith('.')) {
                         bunkInfo += " Cannot miss next class for 80%.";
-                    } else { // Add separator if needed
-                         bunkInfo += ". Cannot miss next class for 80%.";
+                    } else {
+                        bunkInfo += ". Cannot miss next class for 80%.";
                     }
-                 }
-                 requiredClasses = ""; // No classes required
+                }
+                requiredClasses = "";
             }
 
             // --- Display Results ---
-            // Only display lines if they have content
             document.getElementById('requiredClasses').innerHTML = requiredClasses;
             document.getElementById('requiredClasses').style.display = requiredClasses ? 'block' : 'none';
 
             document.getElementById('bunkInfo').innerHTML = bunkInfo;
             document.getElementById('bunkInfo').style.display = bunkInfo ? 'block' : 'none';
 
-            resultDiv.style.display = 'block'; // Show results container
+            resultDiv.style.display = 'block';
+            
+            // Check device capabilities and show appropriate buttons
+            updateShareButtons();
         }
-    </script>
 
+        // Helper function to determine if the device is mobile
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Function to update share buttons based on device capabilities
+        function updateShareButtons() {
+            const shareButton = document.getElementById('shareButton');
+            const downloadButton = document.getElementById('downloadButton');
+            const shareNotSupported = document.getElementById('shareNotSupported');
+            
+            // Mobile with share capability
+            if (navigator.share && isMobileDevice()) {
+                shareButton.style.display = 'flex';
+                downloadButton.style.display = 'none';
+                shareNotSupported.style.display = 'none';
+            } 
+            // Desktop or mobile without share capability
+            else {
+                if (isMobileDevice()) {
+                    // Mobile without share capability
+                    shareButton.style.display = 'none';
+                    downloadButton.style.display = 'flex';
+                    downloadButton.style.width = '100%';
+                    shareNotSupported.style.display = 'block';
+                } else {
+                    // Desktop - always show download button
+                    shareButton.style.display = 'none';
+                    downloadButton.style.display = 'flex';
+                    downloadButton.style.width = '100%';
+                    shareNotSupported.style.display = 'none';
+                }
+            }
+        }
+
+        // Function to capture and download the entire container as an image
+        async function captureAndDownload() {
+            try {
+                const containerElement = document.getElementById('mainContainer');
+                
+                // Temporarily hide buttons for clean screenshot
+                const shareContainer = document.querySelector('.share-container');
+                const originalDisplay = shareContainer.style.display;
+                shareContainer.style.display = 'none';
+                document.getElementById('shareNotSupported').style.display = 'none';
+                
+                // Take screenshot of entire container
+                const canvas = await html2canvas(containerElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // Higher quality
+                    logging: false
+                });
+                
+                // Restore buttons
+                shareContainer.style.display = originalDisplay;
+                
+                // Create download link
+                const dataUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = dataUrl;
+                downloadLink.download = 'attendance-results.png';
+                
+                // Trigger download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+            } catch (error) {
+                console.error('Error capturing and downloading:', error);
+                alert('Failed to generate and download the image.');
+            }
+        }
+
+        // Function to share the entire container as an image on mobile
+        async function shareResults() {
+            try {
+                const containerElement = document.getElementById('mainContainer');
+                
+                // Temporarily hide buttons for clean screenshot
+                const shareContainer = document.querySelector('.share-container');
+                const originalDisplay = shareContainer.style.display;
+                shareContainer.style.display = 'none';
+                document.getElementById('shareNotSupported').style.display = 'none';
+                
+                // Take screenshot of entire container
+                const canvas = await html2canvas(containerElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // Higher quality
+                    logging: false
+                });
+                
+                // Restore buttons
+                shareContainer.style.display = originalDisplay;
+                
+                // Extract text for fallback sharing
+                const attendanceText = document.getElementById('attendancePercentage').textContent;
+                const absentText = document.getElementById('absentClasses').textContent;
+                const requiredText = document.getElementById('requiredClasses').textContent || '';
+                const bunkText = document.getElementById('bunkInfo').textContent || '';
+                
+                const shareText = `${attendanceText}\n${absentText}\n${requiredText ? requiredText + '\n' : ''}${bunkText ? bunkText : ''}`;
+                
+                // Convert canvas to blob for sharing
+                canvas.toBlob(async function(blob) {
+                    try {
+                        // Create a file from the blob
+                        const file = new File([blob], 'attendance-results.png', { type: 'image/png' });
+                        
+                        // Create share data
+                        const shareData = {
+                            title: 'My Attendance Results',
+                            text: shareText,
+                            files: [file]
+                        };
+                        
+                        // Check if the browser supports sharing with files
+                        if (!navigator.canShare || (navigator.canShare && !navigator.canShare(shareData))) {
+                            // Files not supported, share without files
+                            await navigator.share({
+                                title: 'My Attendance Results',
+                                text: shareText
+                            });
+                        } else {
+                            // Share with files
+                            await navigator.share(shareData);
+                        }
+                    } catch (error) {
+                        console.error('Error in sharing with blob:', error);
+                        // Fall back to text-only sharing
+                        await navigator.share({
+                            title: 'My Attendance Results',
+                            text: shareText
+                        });
+                    }
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('Error sharing:', error);
+                alert('Sharing failed. Your browser may not support this feature.');
+            }
+        }
+
+        // When the document is ready, set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButton = document.getElementById('shareButton');
+            const downloadButton = document.getElementById('downloadButton');
+            
+            // Set up share button click handler
+            shareButton.addEventListener('click', shareResults);
+            
+            // Set up download button click handler
+            downloadButton.addEventListener('click', captureAndDownload);
+            
+            // Check device capabilities on load
+            updateShareButtons();
+        });
+    </script>
 </body>
-</html> 
+</html>
